@@ -5,7 +5,7 @@ import Card from "../components/Card";
 import { getCards } from "../util/http";
 import { useEffect, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
-import { WithdrawMoney } from "../util/http";
+import { WithdrawMoney ,DepositMoney} from "../util/http";
 import Input from "../components/Input";
 import Button from "../components/Button";
 import Loading from "../components/Loading";
@@ -15,10 +15,10 @@ import { ImageBackground } from "react-native";
 function CardsScreen({ route }) {
     const [cards, setCards] = useState({});
     const [modalVisible, setModalVisible] = useState(false);
-    const [withdrawSum, setWithdrawSum] = useState(0);
+    const [Sum, setSum] = useState(0);
     const [cardID,setCardID] = useState('');
     const [loading,setLoading] = useState(false);
-
+    const [actionType,setActionType] = useState('');
 
     useEffect(() => {
         async function getUserCards() {
@@ -37,15 +37,18 @@ function CardsScreen({ route }) {
     }, [route]);
 
     useEffect(() => {
-        console.log(withdrawSum);
-    }, [withdrawSum]);
+        console.log(Sum);
+    }, [Sum]);
 
 
     
     async function updateCard(cardID) {
         
         setLoading(true);
-        if(withdrawSum!==0)await WithdrawMoney(cardID, withdrawSum)
+        if(Sum!==0){
+            if(actionType=='withdraw')await WithdrawMoney(cardID, Sum)
+            else await DepositMoney(cardID,Sum);
+        }
         setModalVisible(false);
         setLoading(false);
     }
@@ -57,8 +60,8 @@ function CardsScreen({ route }) {
         <View>
             <Card
                 card={item}
-                onWithdraw={() => {setCardID(Object.keys(cards)[index]),setModalVisible(true)}}//updateCard(Object.keys(cards)[index])}//updateCard(Object.keys(cards)[index])} 
-                onDeposit={() => console.log("punem banu")}
+                onWithdraw={() => {setCardID(Object.keys(cards)[index]),setActionType('withdraw'),setModalVisible(true)}}//updateCard(Object.keys(cards)[index])}//updateCard(Object.keys(cards)[index])} 
+                onDeposit={() => {setCardID(Object.keys(cards)[index]),setActionType('deposit'),setModalVisible(true)}}
             />
         </View>
 
@@ -66,7 +69,7 @@ function CardsScreen({ route }) {
 
     return (
         <LinearGradient colors={['#e6e600', '#FFE600', '#D9AE00']} style={styles.container}>
-            <ImageBackground source={require("../images/Honeycomb.png")}>
+            <ImageBackground style={{flex:1}} source={require("../images/Honeycomb.png")}>
             {cards !== null && (
                 <FlatList
                     data={Object.values(cards)}
@@ -76,8 +79,8 @@ function CardsScreen({ route }) {
             )}
             <Modal visible={modalVisible} animationType={'slide'} transparent={true}>
                 <View style={styles.modalContainer}>
-                    <Input textChange={setWithdrawSum} />
-                    <Button onPress={() => {updateCard(cardID)}}>Withdraw</Button>
+                    <Input textChange={setSum} />
+                    <Button onPress={() => {updateCard(cardID)}}>{actionType=='withdraw'?'Withdraw':'Deposit'}</Button>
                 </View>
             </Modal>
             </ImageBackground>

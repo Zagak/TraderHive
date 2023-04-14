@@ -85,7 +85,7 @@ function LoginScreen({navigation}){
             <Text>Signup instead with ... </Text>
         </View>
         <Button style={{width:'70%'}} onPress={()=> navigation.navigate("Signup")}>Email and Password</Button>
-        <Button style={{width:'70%'}} >           {/*  onPress={FacebookSignup} */}
+        <Button style={{width:'70%'}} onPress={()=>Alert.alert("Hold on!","Still working on that , please SignUp with mail and password instead.")}>           {/*  onPress={FacebookSignup} */}
             <Image style={{ width: 18, height:18 }} source={require('../images/fb.png')}/>
             ㅤSing up with FACEBOOK
         </Button>

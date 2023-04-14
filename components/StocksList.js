@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text } from 'react-native';
 import { csvParse } from 'd3-dsv'
 import { getAllStocks } from '../util/http';
@@ -12,10 +12,11 @@ const API_BASE_URL = 'https://www.alphavantage.co';
 const StocksList = () => {
     const [stocks, setStocks] = useState([]);
     const [renderedStocks, setRenderedStocks] = useState([]);
+    const renderedStocksRef = useRef([]);
     const [pageNumber, setPageNumber] = useState(1);
     const [fetchNumber, setFetchNumber] = useState(0);
-    const [number, setNumber] = useState(0);
-
+    //const [number, setNumber] = useState(0);
+    const number = useRef(0);
 
     useEffect(() => {
         async function getAllStocks() {
@@ -41,13 +42,20 @@ const StocksList = () => {
 
 
     async function renderSymbol() {
-        for (let i = number; i <= number + 0; i++) {//am pus 0 in loc de 2 
+        console.log(number.current);
+        for (let i = number.current; i <= number.current + 0; i++) {//am pus 0 in loc de 2 
             const response = await getStock(stocks[i].symbol, stocks[i].name);
-            if(response!==undefined)setRenderedStocks(prevState => [...prevState, response]);
-            //console.log(response);
+            if(response!==undefined) {
+                setRenderedStocks(prevState => [...prevState, response]);
+               renderedStocksRef.current=[...renderedStocksRef.current,response];
+            }
+            console.log("aici");
+            console.log(renderedStocksRef.current);
+            console.log(number.current);
+            console.log("uite");
         }
-        setNumber(prevNumber => prevNumber + 3);
-
+        //setNumber(prevNumber => prevNumber + 3);
+        number.current = number.current+1;
     }
 
     useEffect(() => {
@@ -55,10 +63,11 @@ const StocksList = () => {
             setFetchNumber(prevFetchNumber => prevFetchNumber + 1);
         }, 90000); // Set interval to 90 seconds
 
-        renderSymbol(); // Call renderSymbol() once when the component mounts
+        if(renderedStocks==null) setRenderedStocks(prevState => [...prevState, renderedStocksRef.current]);
+        renderSymbol(); 
 
         return () => clearInterval(intervalId);
-    }, [fetchNumber, stocks]); // Call the effect whenever fetchNumber changes
+    }, [fetchNumber, stocks]); 
 
 
 
@@ -76,10 +85,10 @@ const StocksList = () => {
                     }
                 }}
                 onEndReached={() => {
-                    // Load the next page of stocks when the user reaches the end of the list
+                    
                     setPageNumber(prevPage => prevPage + 1);
                 }}
-                onEndReachedThreshold={1} // Load the next page of stocks when the user is halfway through the list
+                onEndReachedThreshold={1} 
             />
         </View>
     );

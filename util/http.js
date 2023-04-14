@@ -84,6 +84,33 @@ export async function getStockActualValue(symbol,quantity){
   return ownedStockValue;
 }
 
+export async function sellStock(symbol,quantity,price){
+  const databaseID = await AsyncStorage.getItem('databaseID');
+  console.log(symbol);
+  const currentStock=await axios.get(BACKEND_URL + `/users/${databaseID}/stocks/${symbol}.json`);
+
+  let currentQuantity = 0
+  console.log(currentStock.data);
+  if(currentStock.data!==null) currentQuantity = currentStock.data.quantity;
+  const newQuantity=parseFloat(currentQuantity)-parseFloat(quantity);
+  if(newQuantity<0) return Alert.alert("You don't have the required stocks!","Enter a number <= with the number of the specified stock that you have!");
+
+
+  let currentPrice = 0
+  if(currentStock.data!==null) currentPrice = currentStock.data.price;
+  const newPrice=parseFloat(currentPrice)-parseFloat(price);
+
+
+  const availableMoney=await getAvailableMoney();
+  const remainedMoney=parseFloat(availableMoney)+parseFloat(price);
+
+  if(remainedMoney>=0){
+    await axios.patch(BACKEND_URL + `/users/${databaseID}/stocks/${symbol}.json`,  { quantity: newQuantity,price:newPrice });
+    await axios.patch(BACKEND_URL + `/users/${databaseID}.json`, {NetWorth:remainedMoney});
+  }
+
+}
+
 export async function buyStock(symbol,quantity,price){
   const databaseID = await AsyncStorage.getItem('databaseID');
   console.log(symbol);
@@ -108,6 +135,39 @@ export async function buyStock(symbol,quantity,price){
   }
 }
 
+export async function DepositMoney(cardID,amount){
+  const databaseID = await AsyncStorage.getItem('databaseID');
+
+  const cardData = await axios.get(BACKEND_URL + `/users/${databaseID}/cards/${cardID}.json`);
+
+  const cardAmount = cardData.data.amount; 
+  const cardCurrency=cardData.data.currency;
+  const newAmount = parseFloat(cardAmount) + parseFloat(amount); 
+
+  if(newAmount>=0){
+    await axios.patch(BACKEND_URL + `/users/${databaseID}/cards/${cardID}.json`,  { amount: newAmount });
+    let availableAmount=0;
+    let NetWorthRaw=0;
+    try{
+      availableAmount = await axios.get(BACKEND_URL + `/users/${databaseID}/NetWorth.json`);
+      
+      if(availableAmount.data!==null)NetWorthRaw = availableAmount.data; 
+    }catch(error){
+      await axios.patch(BACKEND_URL + `/users/${databaseID}.json`, {NetWorth:0});
+      NetWorthRaw=0;
+    }
+    
+    const convertedAmount=await getValutarCourse('USD',cardCurrency,amount);
+
+    const NetWorth = parseFloat(NetWorthRaw) - parseFloat(convertedAmount); 
+    if(NetWorth<0) return Alert.alert("You don't have that much money to deposit!","Verify that your ");
+
+    await axios.patch(BACKEND_URL + `/users/${databaseID}.json`, {NetWorth:NetWorth});
+  }
+  else Alert.alert("Error!","Verify your transaction informations");
+}
+
+
 export async function WithdrawMoney(cardID,amount){
   const databaseID = await AsyncStorage.getItem('databaseID');
 
@@ -126,6 +186,7 @@ export async function WithdrawMoney(cardID,amount){
       
       if(availableAmount.data!==null)NetWorthRaw = availableAmount.data; 
     }catch(error){
+      console.log("ajung si eu aici ?");
       await axios.patch(BACKEND_URL + `/users/${databaseID}.json`, {NetWorth:0});
       NetWorthRaw=0;
     }

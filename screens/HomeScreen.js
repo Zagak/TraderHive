@@ -10,7 +10,7 @@ import axios from "axios";
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faQuoteLeft } from '@fortawesome/free-solid-svg-icons';
 import { faQuoteRight } from '@fortawesome/free-solid-svg-icons';
-import { getAvailableMoney, getStocks } from "../util/http";
+import { getAvailableMoney, getStocks ,getExpenses} from "../util/http";
 import { useIsFocused } from "@react-navigation/native";
 import { PieChart } from 'react-native-chart-kit';
 import { DeviceDimensions } from "../constants/DeviceDimensions";
@@ -26,11 +26,9 @@ function HomeScreen() {
   const [money, setMoney] = useState(0);
   const [stocks, setStocks] = useState([]);
   const [stocksValue, setStocksValue] = useState([]);
-
+  const [expenses,SetExpenses] = useState([]);
   const isFocused = useIsFocused();
   const authCtx = useContext(AuthContext);
-
-  const total = 0;
 
   useEffect(() => {
 
@@ -130,9 +128,24 @@ function HomeScreen() {
 
       setStocks(myArray);
     }
-    getAllStocks();
+    if(isFocused==true)getAllStocks();
 
-  }, []);
+
+    //expenses part
+    async function getExpensesAmount(){
+      const expenses=await getExpenses();
+      
+      const expensesArray=Object.keys(expenses).map(key=>{
+        return parseFloat(expenses[key].price)
+      });
+      console.log(expensesArray);
+      SetExpenses(expensesArray);
+    }
+
+    if(isFocused==true)getExpensesAmount();
+  }, [isFocused]);
+
+
 
   async function getStockValue(symbol, quantity) {
     const value = await getStockActualValue(symbol, quantity);
@@ -160,18 +173,9 @@ function HomeScreen() {
   }, [isFocused]);
 
 
-  useEffect(() => {
-    console.log(1);
-    console.log(stocksValue);
-    console.log(2);
-  }, [stocksValue]);
 
 
   const renderItem = ({ item, index }) => {
-    console.log("name:" + item.name + "value:");
-    console.log(stocksValue[index]);
-    console.log(stocks[index]);
-    console.log("index" + index);
     return (
       <View style={styles.itemContainer}>
         <Text style={styles.item}>{item.name}</Text>
@@ -182,6 +186,7 @@ function HomeScreen() {
     );
   };
 
+  
 
   return (
     <LinearGradient colors={Colors.colors} style={styles.container}>
@@ -232,7 +237,10 @@ function HomeScreen() {
             <Text style={styles.profileText}>Invest Worth : {(stocksValue.reduce((acc, value) => acc + value, 0)).toFixed(2)} USD</Text>
           </View>
           <View style={styles.profile}>
-            <Text style={[styles.profileText, { color: (stocks.reduce((acc, stock) => acc + stock.price, 0) - stocksValue.reduce((acc, value) => acc + value, 0)) >= 0 ? 'green' : 'red' }]}>
+          <Text style={styles.profileText}>Invest/Expenses Ratio : {((stocks.reduce((acc, value) => acc + value.price, 0))/(expenses.reduce((acc, value) => acc + value, 0))).toFixed(2)}</Text>
+          </View>
+          <View style={styles.profile}>
+            <Text style={[styles.profileText, { color: (stocks.reduce((acc, stock) => acc + stock.price, 0) - stocksValue.reduce((acc, value) => acc + value, 0)) <= 0 ? 'green' : 'red' }]}>
               ROI : {Math.abs(stocks.reduce((acc, stock) => acc + stock.price, 0) - stocksValue.reduce((acc, value) => acc + value, 0)).toFixed(2)} USD
             </Text>
           </View>
