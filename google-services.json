@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "494437623748",
+    "firebase_url": "https://licentaase-520ca-default-rtdb.firebaseio.com",
+    "project_id": "licentaase-520ca",
+    "storage_bucket": "licentaase-520ca.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:494437623748:android:7e75bfd48136052c4c2691",
+        "android_client_info": {
+          "package_name": "com.eduardpaul.LicentaASE"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "494437623748-eb653p5hib09ffngu7lmb77j3cgh5fp7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.eduardpaul.LicentaASE",
+            "certificate_hash": "2e30f5c04cecff1bd69f359edb6571e163241a66"
+          }
+        },
+        {
+          "client_id": "494437623748-g9lqmfrd1ds7n4kt0skelqgmv03ea4vb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhImFdZRjlZEDW9jr0-EfQfhbuekt0ev0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "494437623748-g9lqmfrd1ds7n4kt0skelqgmv03ea4vb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

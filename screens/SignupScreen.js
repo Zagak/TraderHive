@@ -8,6 +8,9 @@ import Loading from "../components/Loading";
 import { storeUser } from "../util/http";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { ScrollView } from "react-native-gesture-handler";
+import * as Notifications from 'expo-notifications';
+
+
 
 function SignupScreen({ navigation }) {
     const [mail, setMail] = useState('');
@@ -22,6 +25,19 @@ function SignupScreen({ navigation }) {
     const [date, setDate] = useState(new Date());
     const [datePickerVisible, setDatePickerVisible] = useState(false);
     const [dateLabel, setDateLabel] = useState("BirthDate");
+
+    function ScheduleNotificationHandler(){
+        Notifications.scheduleNotificationAsync({
+          content:{
+            title:"Welcome!",
+            body:`Thank you,${name}, for trying TraderHive 🐝❤️`,
+            data:{userName:name}
+          },
+          trigger:{
+            seconds:5
+          }
+        });
+    }
 
     async function HandleSignup() {
         //setIsAuthentificating(true);
@@ -46,6 +62,8 @@ function SignupScreen({ navigation }) {
 
                 await storeUser({ id: credentials.localId, email: credentials.email, adress: adress, phone: phone, birth: convertBirth, name: name });
 
+                ScheduleNotificationHandler();
+
                 navigation.goBack();
             } else {
                 Alert.alert("Something went wrong", "Verify your credentials");
@@ -66,12 +84,16 @@ function SignupScreen({ navigation }) {
         setDatePickerVisible(true);
     }
 
+    
+
     const handleDateChange = (event, selectedDate) => {
         const currentDate = selectedDate;
         setDatePickerVisible(false);
         setBirth(currentDate);
         setDateLabel(currentDate.toString().slice(0, 16));
     };
+
+    
 
     return (
         <ScrollView style={styles.container}>

@@ -2,17 +2,16 @@
   "expo": {
     "name": "TraderHive",
     "slug": "LicentaASE",
-    
-      "plugins": [
-        [
-          "expo-facebook",
-          {
-            "userTrackingPermission": false
-          }
-        ]
+    "plugins": [
+      [
+        "expo-facebook",
+        {
+          "userTrackingPermission": false
+        }
       ],
-    
-    "version": "1.2.0",
+      "react-native-background-fetch"
+    ],
+    "version": "1.7.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -41,15 +40,22 @@
       }
     },
     "android": {
-      "versionCode":3,
+      "versionCode": 8,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
+      "icon": "./assets/icon.png",
       "permissions": [
-        "android.permission.INTERNET"
+        "android.permission.INTERNET",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "RECEIVE_BOOT_COMPLETED",
+        "WAKE_LOCK"
       ],
-      "package": "com.eduardpaul.LicentaASE"
+      "package": "com.eduardpaul.LicentaASE",
+      "useNextNotificationsApi": true,
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -58,6 +64,10 @@
       "eas": {
         "projectId": "8183cd6d-49e9-40bf-a34b-37a0eeba8f0e"
       }
+    },
+    "notification": {
+      "icon": "./assets/icon.png",
+      "color": "#311b92"
     }
   }
 }

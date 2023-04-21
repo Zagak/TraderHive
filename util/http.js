@@ -10,6 +10,20 @@ const API_KEY = 'AIzaSyAlSBYLH1ZNpn1IQiL-Pj3zqr46E3-vCY0';
 const BACKEND_URL = 'https://licentaase-520ca-default-rtdb.firebaseio.com';
 //const databaseID = AsyncStorage.getItem('databaseID');
 
+export async function getEconomisEvent() {
+  const apiKey = '8f4ede045edf406ab1e8b62b6ee19976';
+  const domain = 'cnbc.com';
+  const url = `https://newsapi.org/v2/everything?domains=${domain}&apiKey=${apiKey}`;
+
+  try {
+    const response = await axios.get(url);
+    const articles = response.data.articles;
+    return articles;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
 
 
 export async function storeUser(userData) {
@@ -38,12 +52,12 @@ export async function storeCard(cardData) {
   await axios.post(BACKEND_URL + `/users/${databaseID}/cards.json`, cardData);
 }
 
-export async function getCards(){
+export async function getCards() {
   const databaseID = await AsyncStorage.getItem('databaseID');
   const cards = await axios.get(`${BACKEND_URL}/users/${databaseID}/cards.json`);
   return cards.data;
 }
- 
+
 export async function getValutarCourse(base, target, amount) {
   const apiKey = "jF7UwFiyvVMDhm0qs0MpDrLOy6j8X451";
   const url = `https://api.apilayer.com/fixer/convert?to=${base}&from=${target}&amount=${amount}&apikey=${apiKey}`;
@@ -59,150 +73,150 @@ export async function getValutarCourse(base, target, amount) {
   }
 };
 
-export async function getAvailableMoney(){
+export async function getAvailableMoney() {
   console.log("intruu");
   const databaseID = await AsyncStorage.getItem('databaseID');
   const availableAmount = await axios.get(BACKEND_URL + `/users/${databaseID}/NetWorth.json`);
-  const amount=availableAmount.data;
-  
+  const amount = availableAmount.data;
+
   return amount;
 }
 
-export async function getStocks(){
+export async function getStocks() {
   const databaseID = await AsyncStorage.getItem('databaseID');
-  const stocks=await axios.get(BACKEND_URL + `/users/${databaseID}/stocks.json`);
+  const stocks = await axios.get(BACKEND_URL + `/users/${databaseID}/stocks.json`);
   return stocks.data;
 }
 
-export async function getStockActualValue(symbol,quantity){
+export async function getStockActualValue(symbol, quantity) {
   //const databaseID = await AsyncStorage.getItem('databaseID');
   //const result=await axios.get(BACKEND_URL + `/users/${databaseID}/stocks/${symbol}.json`);
-  const result=await getStock(symbol);
-  
-  const ownedStockValue=result.price*quantity;
-  
+  const result = await getStock(symbol);
+
+  const ownedStockValue = result.price * quantity;
+
   return ownedStockValue;
 }
 
-export async function sellStock(symbol,quantity,price){
+export async function sellStock(symbol, quantity, price) {
   const databaseID = await AsyncStorage.getItem('databaseID');
   console.log(symbol);
-  const currentStock=await axios.get(BACKEND_URL + `/users/${databaseID}/stocks/${symbol}.json`);
+  const currentStock = await axios.get(BACKEND_URL + `/users/${databaseID}/stocks/${symbol}.json`);
 
   let currentQuantity = 0
   console.log(currentStock.data);
-  if(currentStock.data!==null) currentQuantity = currentStock.data.quantity;
-  const newQuantity=parseFloat(currentQuantity)-parseFloat(quantity);
-  if(newQuantity<0) return Alert.alert("You don't have the required stocks!","Enter a number <= with the number of the specified stock that you have!");
+  if (currentStock.data !== null) currentQuantity = currentStock.data.quantity;
+  const newQuantity = parseFloat(currentQuantity) - parseFloat(quantity);
+  if (newQuantity < 0) return Alert.alert("You don't have the required stocks!", "Enter a number <= with the number of the specified stock that you have!");
 
 
   let currentPrice = 0
-  if(currentStock.data!==null) currentPrice = currentStock.data.price;
-  const newPrice=parseFloat(currentPrice)-parseFloat(price);
+  if (currentStock.data !== null) currentPrice = currentStock.data.price;
+  const newPrice = parseFloat(currentPrice) - parseFloat(price);
 
 
-  const availableMoney=await getAvailableMoney();
-  const remainedMoney=parseFloat(availableMoney)+parseFloat(price);
+  const availableMoney = await getAvailableMoney();
+  const remainedMoney = parseFloat(availableMoney) + parseFloat(price);
 
-  if(remainedMoney>=0){
-    await axios.patch(BACKEND_URL + `/users/${databaseID}/stocks/${symbol}.json`,  { quantity: newQuantity,price:newPrice });
-    await axios.patch(BACKEND_URL + `/users/${databaseID}.json`, {NetWorth:remainedMoney});
+  if (remainedMoney >= 0) {
+    await axios.patch(BACKEND_URL + `/users/${databaseID}/stocks/${symbol}.json`, { quantity: newQuantity, price: newPrice });
+    await axios.patch(BACKEND_URL + `/users/${databaseID}.json`, { NetWorth: remainedMoney });
   }
 
 }
 
-export async function buyStock(symbol,quantity,price){
+export async function buyStock(symbol, quantity, price) {
   const databaseID = await AsyncStorage.getItem('databaseID');
   console.log(symbol);
-  const currentStock=await axios.get(BACKEND_URL + `/users/${databaseID}/stocks/${symbol}.json`);
+  const currentStock = await axios.get(BACKEND_URL + `/users/${databaseID}/stocks/${symbol}.json`);
 
   let currentQuantity = 0
   console.log(currentStock.data);
-  if(currentStock.data!==null) currentQuantity = currentStock.data.quantity;
-  const newQuantity=parseFloat(quantity)+parseFloat(currentQuantity);
-  
+  if (currentStock.data !== null) currentQuantity = currentStock.data.quantity;
+  const newQuantity = parseFloat(quantity) + parseFloat(currentQuantity);
+
   let currentPrice = 0
-  if(currentStock.data!==null) currentPrice = currentStock.data.price;
-  const newPrice=parseFloat(price)+parseFloat(currentPrice);
+  if (currentStock.data !== null) currentPrice = currentStock.data.price;
+  const newPrice = parseFloat(price) + parseFloat(currentPrice);
 
-  const availableMoney=await getAvailableMoney();
-  const remainedMoney=parseFloat(availableMoney)-parseFloat(price);
+  const availableMoney = await getAvailableMoney();
+  const remainedMoney = parseFloat(availableMoney) - parseFloat(price);
 
-  if(remainedMoney>=0){
-    await axios.patch(BACKEND_URL + `/users/${databaseID}/stocks/${symbol}.json`,  { quantity: newQuantity,price:newPrice });
+  if (remainedMoney >= 0) {
+    await axios.patch(BACKEND_URL + `/users/${databaseID}/stocks/${symbol}.json`, { quantity: newQuantity, price: newPrice });
     //await axios.patch(BACKEND_URL + `/users/${databaseID}/NetWorth.json`,remainedMoney);
-    await axios.patch(BACKEND_URL + `/users/${databaseID}.json`, {NetWorth:remainedMoney});
+    await axios.patch(BACKEND_URL + `/users/${databaseID}.json`, { NetWorth: remainedMoney });
   }
 }
 
-export async function DepositMoney(cardID,amount){
+export async function DepositMoney(cardID, amount) {
   const databaseID = await AsyncStorage.getItem('databaseID');
 
   const cardData = await axios.get(BACKEND_URL + `/users/${databaseID}/cards/${cardID}.json`);
 
-  const cardAmount = cardData.data.amount; 
-  const cardCurrency=cardData.data.currency;
-  const newAmount = parseFloat(cardAmount) + parseFloat(amount); 
+  const cardAmount = cardData.data.amount;
+  const cardCurrency = cardData.data.currency;
+  const newAmount = parseFloat(cardAmount) + parseFloat(amount);
 
-  if(newAmount>=0){
-    await axios.patch(BACKEND_URL + `/users/${databaseID}/cards/${cardID}.json`,  { amount: newAmount });
-    let availableAmount=0;
-    let NetWorthRaw=0;
-    try{
+  if (newAmount >= 0) {
+    await axios.patch(BACKEND_URL + `/users/${databaseID}/cards/${cardID}.json`, { amount: newAmount });
+    let availableAmount = 0;
+    let NetWorthRaw = 0;
+    try {
       availableAmount = await axios.get(BACKEND_URL + `/users/${databaseID}/NetWorth.json`);
-      
-      if(availableAmount.data!==null)NetWorthRaw = availableAmount.data; 
-    }catch(error){
-      await axios.patch(BACKEND_URL + `/users/${databaseID}.json`, {NetWorth:0});
-      NetWorthRaw=0;
+
+      if (availableAmount.data !== null) NetWorthRaw = availableAmount.data;
+    } catch (error) {
+      await axios.patch(BACKEND_URL + `/users/${databaseID}.json`, { NetWorth: 0 });
+      NetWorthRaw = 0;
     }
-    
-    const convertedAmount=await getValutarCourse('USD',cardCurrency,amount);
 
-    const NetWorth = parseFloat(NetWorthRaw) - parseFloat(convertedAmount); 
-    if(NetWorth<0) return Alert.alert("You don't have that much money to deposit!","Verify that your ");
+    const convertedAmount = await getValutarCourse('USD', cardCurrency, amount);
 
-    await axios.patch(BACKEND_URL + `/users/${databaseID}.json`, {NetWorth:NetWorth});
+    const NetWorth = parseFloat(NetWorthRaw) - parseFloat(convertedAmount);
+    if (NetWorth < 0) return Alert.alert("You don't have that much money to deposit!", "Verify that your ");
+
+    await axios.patch(BACKEND_URL + `/users/${databaseID}.json`, { NetWorth: NetWorth });
   }
-  else Alert.alert("Error!","Verify your transaction informations");
+  else Alert.alert("Error!", "Verify your transaction informations");
 }
 
 
-export async function WithdrawMoney(cardID,amount){
+export async function WithdrawMoney(cardID, amount) {
   const databaseID = await AsyncStorage.getItem('databaseID');
 
   const cardData = await axios.get(BACKEND_URL + `/users/${databaseID}/cards/${cardID}.json`);
 
-  const cardAmount = cardData.data.amount; 
-  const cardCurrency=cardData.data.currency;
-  const newAmount = cardAmount - amount; 
+  const cardAmount = cardData.data.amount;
+  const cardCurrency = cardData.data.currency;
+  const newAmount = cardAmount - amount;
 
-  if(newAmount>=0){
-    await axios.patch(BACKEND_URL + `/users/${databaseID}/cards/${cardID}.json`,  { amount: newAmount });
-    let availableAmount=0;
-    let NetWorthRaw=0;
-    try{
+  if (newAmount >= 0) {
+    await axios.patch(BACKEND_URL + `/users/${databaseID}/cards/${cardID}.json`, { amount: newAmount });
+    let availableAmount = 0;
+    let NetWorthRaw = 0;
+    try {
       availableAmount = await axios.get(BACKEND_URL + `/users/${databaseID}/NetWorth.json`);
-      
-      if(availableAmount.data!==null)NetWorthRaw = availableAmount.data; 
-    }catch(error){
+
+      if (availableAmount.data !== null) NetWorthRaw = availableAmount.data;
+    } catch (error) {
       console.log("ajung si eu aici ?");
-      await axios.patch(BACKEND_URL + `/users/${databaseID}.json`, {NetWorth:0});
-      NetWorthRaw=0;
+      await axios.patch(BACKEND_URL + `/users/${databaseID}.json`, { NetWorth: 0 });
+      NetWorthRaw = 0;
     }
-    
-    const convertedAmount=await getValutarCourse('USD',cardCurrency,amount);
 
-    const NetWorth = parseFloat(NetWorthRaw) + parseFloat(convertedAmount); 
+    const convertedAmount = await getValutarCourse('USD', cardCurrency, amount);
 
-    await axios.patch(BACKEND_URL + `/users/${databaseID}.json`, {NetWorth:NetWorth});
+    const NetWorth = parseFloat(NetWorthRaw) + parseFloat(convertedAmount);
+
+    await axios.patch(BACKEND_URL + `/users/${databaseID}.json`, { NetWorth: NetWorth });
   }
-  else Alert.alert("Too much!","Please enter a withdraw number <= with the actual card available amount");
+  else Alert.alert("Too much!", "Please enter a withdraw number <= with the actual card available amount");
 }
 
 
 
-export async function getStock(symbol,name) {//aveam si un name,idk ce facea
+export async function getStock(symbol, name) {//aveam si un name,idk ce facea
   const API_KEY = '2HAZ31MOAL42TEVB';
   const STOCK_API_URL = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${API_KEY}`;
 
@@ -220,38 +234,38 @@ export async function getStock(symbol,name) {//aveam si un name,idk ce facea
 
 
 
-export async function getStockInfo(symbol){
+export async function getStockInfo(symbol) {
 
   const apiKey = '2HAZ31MOAL42TEVB';
 
   const apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY_ADJUSTED&symbol=${symbol}&apikey=${apiKey}`;
 
   return fetch(apiUrl)
-  .then(response => response.json())
-  .then(data => {
-    const timeSeriesData = data['Monthly Adjusted Time Series'];
+    .then(response => response.json())
+    .then(data => {
+      const timeSeriesData = data['Monthly Adjusted Time Series'];
 
-    const monthlyPrices = [];
+      const monthlyPrices = [];
 
-    // Extract monthly prices from the data
-    for (const date in timeSeriesData) {
-      if (timeSeriesData.hasOwnProperty(date)) {
-        const currentDate = new Date(date);
-        const currentYear = currentDate.getFullYear();
+      // Extract monthly prices from the data
+      for (const date in timeSeriesData) {
+        if (timeSeriesData.hasOwnProperty(date)) {
+          const currentDate = new Date(date);
+          const currentYear = currentDate.getFullYear();
 
-        // Only include data for the last 5 years
-        if (currentYear >= new Date().getFullYear() - 1) {
-          monthlyPrices.push({
-            date: currentDate,
-            price: parseFloat(timeSeriesData[date]['4. close'])
-          });
+          // Only include data for the last 5 years
+          if (currentYear >= new Date().getFullYear() - 1) {
+            monthlyPrices.push({
+              date: currentDate,
+              price: parseFloat(timeSeriesData[date]['4. close'])
+            });
+          }
         }
       }
-    }
-    return monthlyPrices;
-    //console.log(monthlyPrices);
-  })
-  .catch(error => console.error(error));
+      return monthlyPrices;
+      //console.log(monthlyPrices);
+    })
+    .catch(error => console.error(error));
 }
 
 async function getter(path) {
